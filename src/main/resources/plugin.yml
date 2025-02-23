@@ -1,0 +1,4 @@
+name: SpinnyChicken
+version: 1.0
+api-version: 1.21.4
+main: me.aurniox.spinnyChicken.SpinnyChicken
