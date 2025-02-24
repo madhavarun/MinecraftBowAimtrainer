@@ -7,24 +7,48 @@ import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.HashMap;
 import java.util.UUID;
 
+// TODO: allow player to turn while in game/disable moving to other blocks
+// TODO: Create a loop that spawns chickens until count >= 30
 public class GameHandler {
 
     public static final HashMap<UUID, Chicken> activeChickens = new HashMap<>();
+    public static BukkitTask gameTask;
 
     public static void startGame(Player player) {
         player.teleport(player.getWorld().getSpawnLocation());
         player.setMetadata("playing", new FixedMetadataValue(BowTrainer.getInstance(), true));
         spawnChicken(player);
         player.sendMessage(ChatColor.GREEN + "The game has started.");
+
+
+        gameTask = new BukkitRunnable() {
+            int timeLeft = 30;
+            public void run() {
+                // Countdown for aesthetic (wow!)
+                if (timeLeft == 30 || timeLeft == 20 || timeLeft == 10 || timeLeft <= 5) {
+                    player.sendMessage(ChatColor.WHITE + "The game will end in " + ChatColor.YELLOW + timeLeft + ChatColor.WHITE + " seconds.");
+                }
+
+                timeLeft--;
+
+                if (timeLeft <= 0) {
+                    stopGame(player);
+                    this.cancel();
+                    player.sendMessage(ChatColor.GREEN + "The game has ended.");
+                }
+            }
+        }.runTaskTimer(BowTrainer.getInstance(), 0, 20L);
     }
 
     public static void stopGame(Player player) {
         player.teleport(player.getWorld().getSpawnLocation());
         player.sendMessage(ChatColor.RED + "The game has stopped.");
+        gameTask.cancel();
 
         for (Chicken chicken : activeChickens.values()) {
             chicken.remove(); // Remove all chickens
@@ -55,7 +79,6 @@ public class GameHandler {
 
         new BukkitRunnable() {
             double angle = 0; // Angle in radians
-            int timeLeft = 30; // Countdown timer
 
             @Override
             public void run() {
@@ -79,21 +102,7 @@ public class GameHandler {
                 // Increase angle for the next movement
                 angle += Math.toRadians(5); // Adjust speed here
 
-                // Countdown for aesthetic (wow!)
-                if (timeLeft == 30 || timeLeft == 20 || timeLeft == 10 || timeLeft <= 5) {
-                    player.sendMessage(ChatColor.WHITE + "The game will end in " + ChatColor.YELLOW + timeLeft + ChatColor.WHITE + " seconds.");
-                }
-
-                timeLeft--;
-
-                if (timeLeft <= 0) {
-                    activeChickens.remove(chickenId);
-                    this.cancel();
-                    player.sendMessage(ChatColor.GREEN + "The game has ended.");
-                }
             }
         }.runTaskTimer(BowTrainer.getInstance(), 0L, 2L); // Runs every 2 ticks (adjust for smoothness)
     }
-
-
 }

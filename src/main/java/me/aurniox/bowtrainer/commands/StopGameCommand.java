@@ -20,15 +20,15 @@ public class StopGameCommand implements CommandExecutor {
             }
 
             Player player = (Player) sender;
-            GameHandler.startGame(player);
-            sender.sendMessage("§aYou have started your own game!");
+            GameHandler.stopGame(player);
+            sender.sendMessage("§aYou have stopped your game!");
             return true;
         }
 
         // Start game for another player
         if (args.length == 1) {
-            if (!sender.hasPermission("bowtrainer.startgame.others")) {
-                sender.sendMessage(ChatColor.RED + "You do not have permission to start a game for others!");
+            if (!sender.hasPermission("bowtrainer.stopgame.others")) {
+                sender.sendMessage(ChatColor.RED + "You do not have permission to stop a game for others!");
                 return true;
             }
 
@@ -40,8 +40,8 @@ public class StopGameCommand implements CommandExecutor {
             }
 
             GameHandler.startGame(target);
-            sender.sendMessage(ChatColor.GREEN + "You have started a game for " + target.getName() + "!");
-            target.sendMessage(ChatColor.GREEN + "§aYour game has been started by " + sender.getName() + "!");
+            sender.sendMessage(ChatColor.GREEN + "You have stopped a game for " + target.getName() + "!");
+            target.sendMessage(ChatColor.GREEN + "§aYour game has been stopped by " + sender.getName() + "!");
             return true;
         }
 
