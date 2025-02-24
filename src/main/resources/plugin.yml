@@ -1,4 +1,13 @@
-name: SpinnyChicken
-version: 1.0
+name: Bow Trainer
+version: 1.1
 api-version: 1.21.4
-main: me.aurniox.spinnyChicken.SpinnyChicken
+main: me.aurniox.bowtrainer.BowTrainer
+commands:
+  startgame:
+    description: Starts a game for the specified player
+    usage: /startgame <player>
+    permission: bowtrainer.startgame
+  stopgame:
+    description: Stops a game for the specified player
+    usage: /stopgame <player>
+    permission: bowtrainer.stopgame
