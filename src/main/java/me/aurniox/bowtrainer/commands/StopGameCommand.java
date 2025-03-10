@@ -20,6 +20,12 @@ public class StopGameCommand implements CommandExecutor {
             }
 
             Player player = (Player) sender;
+
+            if (!(player.hasMetadata("playing"))) {
+                player.sendMessage( ChatColor.RED + "You are not currently in a game!");
+                return true;
+            }
+
             GameHandler.stopGame(player);
             sender.sendMessage("§aYou have stopped your game!");
             return true;
@@ -36,6 +42,11 @@ public class StopGameCommand implements CommandExecutor {
 
             if (target == null) {
                 sender.sendMessage(ChatColor.RED + "That player is not online!");
+                return true;
+            }
+
+            if (!(target.hasMetadata("playing"))) {
+                target.sendMessage( ChatColor.RED + "That player is not currently in a game!");
                 return true;
             }
 
