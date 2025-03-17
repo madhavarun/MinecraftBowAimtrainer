@@ -15,12 +15,13 @@ import java.util.HashMap;
 import java.util.Random;
 import java.util.UUID;
 
-// TODO: allow player to turn while in game/disable moving to other blocks
-// TODO: Create a loop that spawns chickens until count >= 30
+// TODO: make speed of chickens match score
 public class GameHandler {
 
-    public static final HashMap<UUID, Chicken> activeChickens = new HashMap<>();
+    private static final int maxChickenCount = 10;
+    private static int chickenCount;
     public static BukkitTask gameTask;
+    public static BukkitTask countdownTask;
     public static int playerScore = 0;
     //Set game location to be in spawn
     public static Location gameLocation = getGameLocation();
@@ -28,11 +29,20 @@ public class GameHandler {
     public static void startGame(Player player) {
         player.teleport(gameLocation);
         player.setMetadata("playing", new FixedMetadataValue(BowTrainer.getInstance(), true));
-        spawnChicken(player);
         player.sendMessage(ChatColor.GREEN + "The game has started.");
 
-
+        spawnChicken(player);
         gameTask = new BukkitRunnable() {
+            public void run() {
+                // Add code to make chickens spawn until 10
+                System.out.println(chickenCount);
+                if (chickenCount < maxChickenCount) {
+                    spawnChicken(player);
+                }
+            }
+        }.runTaskTimer(BowTrainer.getInstance(), 0, 10L);
+
+        countdownTask = new BukkitRunnable() {
             int timeLeft = 30;
             public void run() {
                 // Countdown for aesthetic (wow!)
@@ -53,37 +63,33 @@ public class GameHandler {
 
     public static void stopGame(Player player) {
         player.teleport(player.getWorld().getSpawnLocation());
+        countdownTask.cancel();
         gameTask.cancel();
-
-        for (Chicken chicken : activeChickens.values()) {
-            chicken.remove(); // Remove all chickens
-        }
 
         player.sendMessage("Your score was " + playerScore);
 
-        activeChickens.clear();
         player.removeMetadata("playing", BowTrainer.getInstance());
     }
 
     private static void spawnChicken(Player player) {
         Random rand = new Random();
 
-        // Spawn the chicken at the player's location
+        // Spawn the chicken around the player
         Location spawnLocation = player.getLocation();
         Chicken chicken = player.getWorld().spawn(spawnLocation, Chicken.class);
 
+        // Set metadata used for score, speed, and game entity marker
         chicken.setMetadata("playing", new FixedMetadataValue(BowTrainer.getInstance(), true));
         chicken.setMetadata("score", new FixedMetadataValue(BowTrainer.getInstance(), rand.nextInt(3) + 1));
-
-        UUID chickenId = chicken.getUniqueId();
 
         // Disable chicken AI
         chicken.setAI(false);
         chicken.setGravity(false); // Optional, prevents falling
 
-        activeChickens.put(chickenId, chicken);
         double radius = 10.0; // Radius of the circular motion
         Location center = spawnLocation.clone(); // Center point of the circle
+        center.setY(rand.nextInt(4) - 1);
+        chickenCount ++;
 
         new BukkitRunnable() {
             double angle = 0; // Angle in radians
@@ -92,7 +98,8 @@ public class GameHandler {
             public void run() {
                 // Stop if the chicken is removed, dies, or player doesn't have the correct metadata
                 if (chicken.isDead() || !chicken.isValid() || !player.hasMetadata("playing")) {
-                    activeChickens.remove(chickenId);
+                    chicken.remove();
+                    chickenCount--;
                     this.cancel();
                     return;
                 }
