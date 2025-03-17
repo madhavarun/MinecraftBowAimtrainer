@@ -53,6 +53,7 @@ public class GameListener implements Listener {
         if (!(event.getEntity() instanceof Chicken)) {
             return;
         }
+
         System.out.println("Chicken Died");
         Chicken chicken = (Chicken) event.getEntity();
 
@@ -66,8 +67,13 @@ public class GameListener implements Listener {
         event.setDroppedExp(0);
         chicken.remove();
         int chickenScore = getMetadataInt(chicken, "score");
-        System.out.println(chickenScore);
+
         GameHandler.playerScore += chickenScore;
+
+        Entity damager = event.getDamageSource().getCausingEntity();
+        if (damager instanceof Player) {
+            damager.sendMessage("Current Score: " + GameHandler.playerScore);
+        }
     }
 
     private int getMetadataInt(Entity chicken, String key) {

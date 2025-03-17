@@ -20,6 +20,10 @@ public class StartGameCommand implements CommandExecutor {
             }
 
             Player player = (Player) sender;
+            if (player.hasMetadata("playing")) {
+                sender.sendMessage(ChatColor.RED + "You are already in a game");
+                return true;
+            }
             GameHandler.startGame(player);
             sender.sendMessage("§aYou have started your own game!");
             return true;
@@ -36,6 +40,11 @@ public class StartGameCommand implements CommandExecutor {
 
             if (target == null) {
                 sender.sendMessage(ChatColor.RED + "That player is not online!");
+                return true;
+            }
+
+            if (target.hasMetadata("playing")) {
+                sender.sendMessage(ChatColor.RED + "This player is already in a game");
                 return true;
             }
 
