@@ -46,7 +46,6 @@ public class StartGameCommand implements CommandExecutor {
         }
 
         // Send usage
-        sender.sendMessage(ChatColor.RED + "Usage: /startgame <player>");
-        return true;
+        return false;
     }
 }

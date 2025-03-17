@@ -1,8 +1,10 @@
 package me.aurniox.bowtrainer.handler;
 
 import me.aurniox.bowtrainer.BowTrainer;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
@@ -10,6 +12,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.HashMap;
+import java.util.Random;
 import java.util.UUID;
 
 // TODO: allow player to turn while in game/disable moving to other blocks
@@ -18,9 +21,12 @@ public class GameHandler {
 
     public static final HashMap<UUID, Chicken> activeChickens = new HashMap<>();
     public static BukkitTask gameTask;
+    public static int playerScore = 0;
+    //Set game location to be in spawn
+    public static Location gameLocation = getGameLocation();
 
     public static void startGame(Player player) {
-        player.teleport(player.getWorld().getSpawnLocation());
+        player.teleport(gameLocation);
         player.setMetadata("playing", new FixedMetadataValue(BowTrainer.getInstance(), true));
         spawnChicken(player);
         player.sendMessage(ChatColor.GREEN + "The game has started.");
@@ -47,25 +53,27 @@ public class GameHandler {
 
     public static void stopGame(Player player) {
         player.teleport(player.getWorld().getSpawnLocation());
-        player.sendMessage(ChatColor.RED + "The game has stopped.");
         gameTask.cancel();
 
         for (Chicken chicken : activeChickens.values()) {
             chicken.remove(); // Remove all chickens
         }
 
+        player.sendMessage("Your score was " + playerScore);
+
         activeChickens.clear();
         player.removeMetadata("playing", BowTrainer.getInstance());
     }
 
     private static void spawnChicken(Player player) {
+        Random rand = new Random();
+
         // Spawn the chicken at the player's location
         Location spawnLocation = player.getLocation();
         Chicken chicken = player.getWorld().spawn(spawnLocation, Chicken.class);
 
-        for (Chicken chicken1 : activeChickens.values()) {
-            chicken1.setMetadata("playing", new FixedMetadataValue(BowTrainer.getInstance(), true));
-        }
+        chicken.setMetadata("playing", new FixedMetadataValue(BowTrainer.getInstance(), true));
+        chicken.setMetadata("score", new FixedMetadataValue(BowTrainer.getInstance(), rand.nextInt(3) + 1));
 
         UUID chickenId = chicken.getUniqueId();
 
@@ -104,5 +112,12 @@ public class GameHandler {
 
             }
         }.runTaskTimer(BowTrainer.getInstance(), 0L, 2L); // Runs every 2 ticks (adjust for smoothness)
+    }
+
+    private static Location getGameLocation() {
+            World mainWorld = Bukkit.getWorlds().getFirst();
+            Location spawn =  mainWorld.getSpawnLocation();
+            // Adjust X and Z to be at the center of the block
+            return new Location(mainWorld, spawn.getX() + 0.5, spawn.getY(), spawn.getZ() + 0.5, spawn.getYaw(), spawn.getPitch());
     }
 }
