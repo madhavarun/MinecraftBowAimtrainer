@@ -1,5 +1,6 @@
 package me.aurniox.bowtrainer;
 
+import me.aurniox.bowtrainer.commands.SetRadiusCommand;
 import me.aurniox.bowtrainer.commands.StartGameCommand;
 import me.aurniox.bowtrainer.commands.StopGameCommand;
 import me.aurniox.bowtrainer.handler.GameHandler;
@@ -41,6 +42,7 @@ public class BowTrainer extends JavaPlugin {
     public void loadCommands() {
         getCommand("startgame").setExecutor(new StartGameCommand());
         getCommand("stopgame").setExecutor(new StopGameCommand());
+        getCommand("setradius").setExecutor(new SetRadiusCommand());
     }
 
     public static BowTrainer getInstance() {

@@ -2,7 +2,9 @@ package me.aurniox.bowtrainer.listeners;
 
 import me.aurniox.bowtrainer.BowTrainer;
 import me.aurniox.bowtrainer.handler.GameHandler;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -12,6 +14,7 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.metadata.MetadataValue;
+import org.bukkit.scheduler.BukkitRunnable;
 
 public class GameListener implements Listener {
 
@@ -66,17 +69,25 @@ public class GameListener implements Listener {
         event.getDrops().clear();
         event.setDroppedExp(0);
         chicken.remove();
-        int chickenScore = getMetadataInt(chicken, "score");
-
+        int chickenScore = getMetadataAsInt(chicken, "score");
         GameHandler.playerScore += chickenScore;
 
-        Entity damager = event.getDamageSource().getCausingEntity();
-        if (damager instanceof Player) {
-            damager.sendMessage("Current Score: " + GameHandler.playerScore);
-        }
+        // + <score> points, kill armor stand after 2 seconds
+        ArmorStand scoreHologram = chicken.getWorld().spawn(chicken.getLocation(), ArmorStand.class);
+        scoreHologram.setGravity(false);
+        scoreHologram.setInvisible(true);
+        scoreHologram.setInvulnerable(true);
+        scoreHologram.setCustomName(ChatColor.YELLOW + "+ " + ChatColor.AQUA + chickenScore + ChatColor.YELLOW + " points");
+        scoreHologram.setCustomNameVisible(true);
+
+        new BukkitRunnable() {
+            public void run() {
+                scoreHologram.remove();
+            }
+        }.runTaskLater(BowTrainer.getInstance(), 40);
     }
 
-    private int getMetadataInt(Entity chicken, String key) {
+    private int getMetadataAsInt(Entity chicken, String key) {
         if (chicken.hasMetadata(key)) {
             for (MetadataValue value : chicken.getMetadata(key)) {
                 if (value.getOwningPlugin().equals(BowTrainer.getInstance())) {

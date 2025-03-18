@@ -11,21 +11,23 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.HashMap;
 import java.util.Random;
-import java.util.UUID;
 
-// TODO: make speed of chickens match score
 public class GameHandler {
 
     private static final int maxChickenCount = 20;
     public static int playerScore = 0;
-    private static int chickenCount;
-    public static BukkitTask gameTask;
-    public static BukkitTask countdownTask;
-
+    private static int chickenCount = 0;
+    // Tasks that are run
+    private static BukkitTask gameTask;
+    private static BukkitTask countdownTask;
     // Set game location to be in spawn
     public static Location gameLocation = getGameLocation();
+    // Radius that chickens circle
+    public static double minRadius = 3;
+    public static double maxRadius = 30;
+    private static double radius = 15;
+
 
     public static void startGame(Player player) {
         // Initialize variables
@@ -67,12 +69,9 @@ public class GameHandler {
     }
 
     public static void stopGame(Player player) {
-        player.teleport(player.getWorld().getSpawnLocation());
         countdownTask.cancel();
         gameTask.cancel();
-
         player.sendMessage("Your score was " + playerScore);
-
         player.removeMetadata("playing", BowTrainer.getInstance());
     }
 
@@ -89,18 +88,17 @@ public class GameHandler {
         chicken.setMetadata("playing", new FixedMetadataValue(BowTrainer.getInstance(), true));
         chicken.setMetadata("score", new FixedMetadataValue(BowTrainer.getInstance(), chickenScore));
 
-        // Disable chicken AI
         chicken.setAI(false);
-        chicken.setGravity(false); // Optional, prevents falling
+        chicken.setGravity(false);
+        chicken.setHealth(1);
 
-        double radius = 10.0; // Radius of the circular motion
         Location center = spawnLocation.clone(); // Center point of the circle
         chickenCount ++;
 
+        // Separate for each chicken instance, stops whenever game stops or individual chicken dies
         new BukkitRunnable() {
             double angle = 0; // Angle in radians
 
-            @Override
             public void run() {
                 // Stop if the chicken is removed, dies, or player doesn't have the correct metadata
                 // DO NOT HANDLE SCORE as this runs regardless at end of game
@@ -128,10 +126,21 @@ public class GameHandler {
         }.runTaskTimer(BowTrainer.getInstance(), 0L, 2L); // Runs every 2 ticks (adjust for smoothness)
     }
 
+    public static void summonScoreHologram(int score) {
+        // Code to summon armor stand with score as name
+    }
+
     private static Location getGameLocation() {
             World mainWorld = Bukkit.getWorlds().getFirst();
             Location spawn =  mainWorld.getSpawnLocation();
             // Adjust X and Z to be at the center of the block
             return new Location(mainWorld, spawn.getX() + 0.5, spawn.getY(), spawn.getZ() + 0.5, spawn.getYaw(), spawn.getPitch());
+    }
+
+    public static void setRadius(double newRadius) {
+        if (newRadius < minRadius || newRadius > maxRadius) {
+            return;
+        }
+        radius = newRadius;
     }
 }

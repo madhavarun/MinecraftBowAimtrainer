@@ -11,3 +11,7 @@ commands:
     description: Stops a game for the specified player
     usage: /stopgame <player>
     permission: bowtrainer.stopgame
+  setradius:
+    description: Set the radius that chicken spawn around the player
+    usage: /setradius <number>
+    permission: bowtrainer.setradius
