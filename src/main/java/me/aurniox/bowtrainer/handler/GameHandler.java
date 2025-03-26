@@ -1,10 +1,9 @@
 package me.aurniox.bowtrainer.handler;
 
 import me.aurniox.bowtrainer.BowTrainer;
-import org.bukkit.Bukkit;
+import me.aurniox.bowtrainer.util.LocationUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
@@ -15,22 +14,25 @@ import java.util.Random;
 
 public class GameHandler {
 
+    // locations
+    public static Location lobbyLocation = LocationUtil.getLocationFromConfig("lobby");
+    public static Location gameLocation = LocationUtil.getLocationFromConfig("game");
+
     private static final int maxChickenCount = 20;
     public static int playerScore = 0;
     private static int chickenCount = 0;
-    // Tasks that are run
+
+    // tasks
     private static BukkitTask gameTask;
     private static BukkitTask countdownTask;
-    // Set game location to be in spawn
-    public static Location gameLocation = getGameLocation();
-    // Radius that chickens circle
+
+    // radius
     public static double minRadius = 3;
     public static double maxRadius = 30;
     private static double radius = 15;
 
 
     public static void startGame(Player player) {
-        // Initialize variables
         playerScore = 0;
         chickenCount = 0;
 
@@ -62,7 +64,6 @@ public class GameHandler {
                 if (timeLeft <= 0) {
                     stopGame(player);
                     this.cancel();
-                    player.sendMessage(ChatColor.GREEN + "The game has ended.");
                 }
             }
         }.runTaskTimer(BowTrainer.getInstance(), 0, 20L);
@@ -71,6 +72,9 @@ public class GameHandler {
     public static void stopGame(Player player) {
         countdownTask.cancel();
         gameTask.cancel();
+
+        player.teleport(lobbyLocation);
+        player.sendMessage(ChatColor.GREEN + "The game has ended.");
         player.sendMessage("Your score was " + playerScore);
         player.removeMetadata("playing", BowTrainer.getInstance());
     }
@@ -124,17 +128,6 @@ public class GameHandler {
 
             }
         }.runTaskTimer(BowTrainer.getInstance(), 0L, 2L); // Runs every 2 ticks (adjust for smoothness)
-    }
-
-    public static void summonScoreHologram(int score) {
-        // Code to summon armor stand with score as name
-    }
-
-    private static Location getGameLocation() {
-            World mainWorld = Bukkit.getWorlds().getFirst();
-            Location spawn =  mainWorld.getSpawnLocation();
-            // Adjust X and Z to be at the center of the block
-            return new Location(mainWorld, spawn.getX() + 0.5, spawn.getY(), spawn.getZ() + 0.5, spawn.getYaw(), spawn.getPitch());
     }
 
     public static void setRadius(double newRadius) {

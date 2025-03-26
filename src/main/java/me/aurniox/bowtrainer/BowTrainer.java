@@ -1,38 +1,38 @@
 package me.aurniox.bowtrainer;
 
+import lombok.Getter;
+import me.aurniox.bowtrainer.commands.SetLocCommand;
 import me.aurniox.bowtrainer.commands.SetRadiusCommand;
 import me.aurniox.bowtrainer.commands.StartGameCommand;
 import me.aurniox.bowtrainer.commands.StopGameCommand;
 import me.aurniox.bowtrainer.handler.GameHandler;
 import me.aurniox.bowtrainer.listeners.GameListener;
-import org.bukkit.Location;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class BowTrainer extends JavaPlugin {
 
-    private static BowTrainer instance;
-    private GameHandler gameHandler;
+    @Getter private static BowTrainer instance;
+    @Getter private GameHandler gameHandler;
 
     public void onEnable() {
         instance = this;
 
-        System.out.println();
-        System.out.println("[BowTrainer] Plugin loaded successfully");
-        System.out.println();
+        saveDefaultConfig();
 
-        loadHandlers();
+
+        Bukkit.getLogger().info("");
+        Bukkit.getLogger().info("[BowTrainer] Plugin loaded successfully");
+        Bukkit.getLogger().info("");
+
         loadListeners();
         loadCommands();
     }
 
     public void onDisable() {
-        System.out.println();
-        System.out.println("[BowTrainer] Disabling plugin");
-        System.out.println();
-    }
-
-    public void loadHandlers() {
-        gameHandler = new GameHandler();
+        Bukkit.getLogger().info("");
+        Bukkit.getLogger().info("[BowTrainer] Disabling plugin");
+        Bukkit.getLogger().info("");
     }
 
     public void loadListeners() {
@@ -43,9 +43,7 @@ public class BowTrainer extends JavaPlugin {
         getCommand("startgame").setExecutor(new StartGameCommand());
         getCommand("stopgame").setExecutor(new StopGameCommand());
         getCommand("setradius").setExecutor(new SetRadiusCommand());
+        getCommand("setloc").setExecutor(new SetLocCommand());
     }
 
-    public static BowTrainer getInstance() {
-        return instance;
-    }
 }

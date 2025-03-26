@@ -15,3 +15,7 @@ commands:
     description: Set the radius that chicken spawn around the player
     usage: /setradius <number>
     permission: bowtrainer.setradius
+  setloc:
+    description: Set the location of the game/lobby
+    usage: /setloc <location>
+    permission: bowtrainer.setloc
